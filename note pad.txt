@@ -1,0 +1,2 @@
+.\server.ps1 -Port 8080 -AdminPassword "yourPassword"
+on this pc   http://localhost:8080/admin.html

@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Admin panel for pricing and products" />
+    <title>Madni Care Center • Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-page="admin">
+    <header class="topbar">
+      <div class="container">
+        <nav class="nav" aria-label="Main navigation">
+          <a class="brand" href="index.html">
+            <span class="logo" aria-hidden="true"></span>
+            <span data-biz-name>Your Business Name</span>
+          </a>
+          <div class="spacer"></div>
+          <div class="nav-links">
+            <a data-nav data-nav="home" href="index.html">Home</a>
+            <a data-nav data-nav="products" href="products.html">Shop</a>
+            <a data-nav data-nav="about" href="about.html">About</a>
+            <a data-nav data-nav="contact" href="contact.html">Contact</a>
+            <a class="pill" href="cart.html" aria-label="Cart">
+              Cart <span class="badge" data-cart-count>0</span>
+            </a>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <div class="page-cover" aria-hidden="true"></div>
+
+    <main class="section admin-page-main">
+      <div class="container">
+        <div class="card pad">
+          <div class="row admin-page-head" style="margin-bottom: 0">
+            <h1 style="margin: 0; letter-spacing: -0.4px">Admin</h1>
+            <div class="spacer admin-page-head-spacer"></div>
+            <a class="btn small admin-back-shop" href="products.html">Back to shop</a>
+          </div>
+
+          <p class="subhead" style="margin:0 0 12px;">
+            Pricing control + add products. Uses the backend server at <code>http://localhost:8080</code>.
+          </p>
+
+          <div class="divider"></div>
+
+          <div class="grid" style="gap:12px; margin-top:12px;">
+            <div class="col-6 field">
+              <label for="adminPassword">Admin password <span class="muted" style="font-weight: 600">(required)</span></label>
+              <input
+                class="input"
+                id="adminPassword"
+                name="adminPassword"
+                type="password"
+                required
+                aria-required="true"
+                value="7860"
+                autocomplete="current-password"
+                placeholder="Required — same as server.ps1 (default 7860)"
+              />
+              <label class="row" style="margin-top: 6px; gap: 8px; cursor: pointer; font-weight: 650; font-size: 13px; color: rgba(23,59,45,.82);">
+                <input type="checkbox" id="adminPasswordShow" />
+                Show password
+              </label>
+              <p class="help">Used only when you click Save/Add (writes are protected).</p>
+            </div>
+            <div class="col-6">
+              <div class="note">
+                <strong>Tip:</strong> You can change the password in <code>server.ps1</code>.
+              </div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="two-col admin-main-columns">
+            <section class="admin-pricing-section">
+              <h2 style="margin:0 0 10px;">Pricing control</h2>
+              <p class="subhead" style="margin:0 0 12px;">Update PKR prices and compare-at values for every product.</p>
+
+              <div class="admin-table-scroll">
+                <table class="table" id="pricingTable">
+                  <thead>
+                    <tr>
+                      <th>Product</th>
+                      <th>Category</th>
+                      <th>Subcategory</th>
+                      <th class="right">Price (PKR)</th>
+                      <th class="right">Compare at (PKR)</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+
+              <div class="row admin-save-row" style="margin-top: 8px">
+                <button class="btn primary admin-save-btn" id="savePricingBtn" type="button">Save pricing</button>
+                <div class="spacer admin-save-spacer"></div>
+                <span class="tiny admin-save-status" id="pricingStatus"></span>
+              </div>
+            </section>
+
+            <aside class="stack admin-add-aside" style="gap: 4px">
+              <section class="card pad soft admin-add-card" style="box-shadow: none">
+                <h2 style="margin:0 0 10px;">Add product</h2>
+                <p class="subhead" style="margin:0 0 12px;">Adds a new item to your shop (backend + appears everywhere).</p>
+
+                <form id="addProductAdminForm" class="stack" style="gap:4px;">
+                  <div class="field">
+                    <label for="aName">Product name *</label>
+                    <input class="input" id="aName" required placeholder="e.g., Herbal Tea Blend" />
+                  </div>
+                  <div class="field">
+                    <label for="aShort">Short description *</label>
+                    <input class="input" id="aShort" required placeholder="e.g., Calm evenings in every cup" />
+                  </div>
+                  <div class="field">
+                    <label for="aDesc">Full description *</label>
+                    <textarea class="input" id="aDesc" rows="4" required placeholder="Ingredients, usage, benefits..."></textarea>
+                  </div>
+
+                  <div class="field">
+                    <label for="aCategory">Category *</label>
+                    <input class="input" id="aCategory" required placeholder="e.g., Herbal Items" />
+                  </div>
+                  <div class="field">
+                    <label for="aSubcategory">Subcategory</label>
+                    <input class="input" id="aSubcategory" placeholder="e.g., Seeds" />
+                  </div>
+
+                  <div class="grid" style="gap:4px;">
+                    <div class="col-6 field">
+                      <label for="aPrice">Price (PKR) *</label>
+                      <input class="input" id="aPrice" type="number" min="0" step="1" required placeholder="e.g., 2500" />
+                    </div>
+                    <div class="col-6 field">
+                      <label for="aCompareAt">Compare at (PKR)</label>
+                      <input class="input" id="aCompareAt" type="number" min="0" step="1" placeholder="(optional)" />
+                    </div>
+                  </div>
+
+                  <div class="field">
+                    <label for="aTags">Tags (comma separated)</label>
+                    <input class="input" id="aTags" placeholder="e.g., Pansar store, Pure" />
+                  </div>
+
+                  <div class="field">
+                    <label for="aPhotoFile">Product photo (mobile camera / gallery)</label>
+                    <input type="file" id="aPhotoFile" accept="image/*" class="input" style="padding: 10px 8px" />
+                    <p class="help">Photo yahin compress ho kar server par save hogi. Optional: neeche URL bhi de sakte hain.</p>
+                  </div>
+                  <div class="field">
+                    <label for="aImage">Ya image URL (optional)</label>
+                    <input class="input" id="aImage" placeholder="https://… or /assets/file.jpg" />
+                  </div>
+
+                  <button class="btn primary" type="submit">Add product</button>
+                  <div class="tiny muted" id="addProductStatus"></div>
+                </form>
+              </section>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="row">
+          <div class="stack" style="gap:4px;">
+            <strong data-biz-name>Your Business Name</strong>
+            <div class="tiny" data-biz-tagline>Modern wellness products crafted with care.</div>
+          </div>
+          <div class="spacer"></div>
+          <div class="row">
+            <a href="products.html">Shop</a>
+            <a href="about.html">About</a>
+            <a href="contact.html">Contact</a>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="tiny">© <span id="year"></span> <span data-biz-name>Your Business Name</span>.</div>
+      </div>
+    </footer>
+
+    <div class="toast" id="toast" role="status" aria-live="polite">
+      <span class="dot" aria-hidden="true"></span>
+      <span data-toast-text>Updated</span>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="app.js"></script>
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+
+    <script>
+      async function apiGet(path) {
+        const res = await fetch(path, { cache: "no-store" });
+        if (!res.ok) throw new Error("Request failed: " + path);
+        return await res.json();
+      }
+
+      async function apiPost(path, body, adminPassword) {
+        const res = await fetch(path, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Admin-Password": adminPassword || "",
+          },
+          body: JSON.stringify(body),
+        });
+        if (!res.ok) {
+          const text = await res.text().catch(() => "");
+          throw new Error("Save failed (" + res.status + "): " + (text || res.statusText));
+        }
+        return await res.json().catch(() => ({}));
+      }
+
+      function money(n) {
+        return Number(n).toLocaleString("en-PK", {
+          style: "currency",
+          currency: "PKR",
+          maximumFractionDigits: 0,
+        });
+      }
+
+      let addProductImageDataUrl = null;
+
+      function compressImageToDataUrl(file) {
+        return new Promise((resolve, reject) => {
+          const maxBytes = 14 * 1024 * 1024;
+          const maxEdge = 1400;
+          if (!file || !file.type || file.type.indexOf("image/") !== 0) {
+            reject(new Error("Sirf image file chuniye."));
+            return;
+          }
+          if (file.size > maxBytes) {
+            reject(new Error("Photo bahut bari hai."));
+            return;
+          }
+          const img = new Image();
+          const u = URL.createObjectURL(file);
+          img.onload = function () {
+            URL.revokeObjectURL(u);
+            let w = img.naturalWidth || img.width;
+            let h = img.naturalHeight || img.height;
+            if (w > maxEdge || h > maxEdge) {
+              if (w >= h) {
+                h = Math.round((h * maxEdge) / w);
+                w = maxEdge;
+              } else {
+                w = Math.round((w * maxEdge) / h);
+                h = maxEdge;
+              }
+            }
+            const canvas = document.createElement("canvas");
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, w, h);
+            try {
+              resolve(canvas.toDataURL("image/jpeg", 0.82));
+            } catch (e) {
+              reject(new Error("Image save error"));
+            }
+          };
+          img.onerror = function () {
+            URL.revokeObjectURL(u);
+            reject(new Error("Image load nahi hui"));
+          };
+          img.src = u;
+        });
+      }
+
+      const adminPasswordEl = document.getElementById("adminPassword");
+      const adminPasswordShowEl = document.getElementById("adminPasswordShow");
+      adminPasswordShowEl?.addEventListener("change", function () {
+        adminPasswordEl.type = this.checked ? "text" : "password";
+      });
+      const pricingTableBody = document.querySelector("#pricingTable tbody");
+      const pricingStatus = document.getElementById("pricingStatus");
+      const savePricingBtn = document.getElementById("savePricingBtn");
+      const addProductAdminForm = document.getElementById("addProductAdminForm");
+      const addProductStatus = document.getElementById("addProductStatus");
+      const aPhotoFileEl = document.getElementById("aPhotoFile");
+      aPhotoFileEl?.addEventListener("change", async function (e) {
+        const f = e.target.files && e.target.files[0];
+        e.target.value = "";
+        if (!f) return;
+        try {
+          addProductImageDataUrl = await compressImageToDataUrl(f);
+          addProductStatus.textContent = "Photo tayar — Add product dabayein.";
+        } catch (err) {
+          addProductImageDataUrl = null;
+          alert(String(err.message || err));
+          addProductStatus.textContent = "";
+        }
+      });
+
+      let overrides = {};
+      let userProducts = [];
+      let baseProducts = (window.PANGY && window.PANGY.BASE_PRODUCTS) ? window.PANGY.BASE_PRODUCTS : [];
+
+      function effectivePrice(product) {
+        const o = overrides && overrides[product.id] ? overrides[product.id] : null;
+        return Number(o && o.price !== undefined ? o.price : product.price);
+      }
+
+      function effectiveCompare(product) {
+        const o = overrides && overrides[product.id] ? overrides[product.id] : null;
+        const fallback = (typeof product.compareAt === "number" ? product.compareAt : product.price);
+        return Number(o && o.compareAt !== undefined ? o.compareAt : fallback);
+      }
+
+      function renderPricingTable() {
+        const all = baseProducts.concat(userProducts);
+        pricingTableBody.innerHTML = all
+          .map((p) => {
+            const curPrice = effectivePrice(p);
+            const curCompare = effectiveCompare(p);
+            return `
+              <tr>
+                <td>
+                  <div style="font-weight:850; letter-spacing:-0.2px;">${p.name}</div>
+                  <div class="muted" style="font-size:12px;">${p.short || ""}</div>
+                </td>
+                <td>${p.category || ""}</td>
+                <td>${p.subcategory || "-"}</td>
+                <td class="right">
+                  <input class="input" style="max-width:120px; text-align:right;" type="number" step="1" min="0"
+                    value="${curPrice}" data-price="${p.id}" />
+                </td>
+                <td class="right">
+                  <input class="input" style="max-width:120px; text-align:right;" type="number" step="1" min="0"
+                    value="${curCompare}" data-compare="${p.id}" />
+                </td>
+              </tr>
+            `;
+          })
+          .join("");
+      }
+
+      async function loadAdminData() {
+        pricingStatus.textContent = "Loading...";
+        overrides = await apiGet("/api/pricing-overrides").catch(() => ({}));
+        userProducts = await apiGet("/api/user-products").catch(() => []);
+        renderPricingTable();
+        pricingStatus.textContent = "Ready";
+      }
+
+      savePricingBtn.addEventListener("click", async () => {
+        if (!adminPasswordEl.checkValidity()) {
+          adminPasswordEl.reportValidity();
+          pricingStatus.textContent = "";
+          return;
+        }
+        const pw = adminPasswordEl.value.trim();
+        if (!pw) {
+          pricingStatus.textContent = "Password required";
+          return;
+        }
+
+        const rows = pricingTableBody.querySelectorAll("tr");
+        const tableOverrides = {};
+
+        for (const tr of rows) {
+          const priceInput = tr.querySelector("[data-price]");
+          const compareInput = tr.querySelector("[data-compare]");
+          if (!priceInput) continue;
+          const productId = priceInput.getAttribute("data-price");
+          const price = Number(priceInput.value);
+          const compareAt = Number(compareInput ? compareInput.value : price);
+          if (!Number.isFinite(price) || price < 0) continue;
+
+          tableOverrides[productId] = {
+            price,
+            compareAt: Number.isFinite(compareAt) ? compareAt : price,
+          };
+        }
+
+        pricingStatus.textContent = "Saving...";
+        try {
+          await apiPost("/api/pricing-overrides", { overrides: tableOverrides }, pw);
+          pricingStatus.textContent = "Saved";
+        } catch (e) {
+          pricingStatus.textContent = "Error";
+          alert(String(e.message || e));
+        }
+        await loadAdminData();
+      });
+
+      addProductAdminForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (!adminPasswordEl.checkValidity()) {
+          adminPasswordEl.reportValidity();
+          addProductStatus.textContent = "";
+          return;
+        }
+        const pw = adminPasswordEl.value.trim();
+        if (!pw) {
+          addProductStatus.textContent = "Password required";
+          return;
+        }
+
+        const name = document.getElementById("aName").value.trim();
+        const short = document.getElementById("aShort").value.trim();
+        const description = document.getElementById("aDesc").value.trim();
+        const category = document.getElementById("aCategory").value.trim();
+        const subcategory = document.getElementById("aSubcategory").value.trim();
+        const price = Number(document.getElementById("aPrice").value);
+        const compareAtRaw = document.getElementById("aCompareAt").value;
+        const compareAt = compareAtRaw === "" ? null : Number(compareAtRaw);
+        const tagsRaw = document.getElementById("aTags").value || "";
+        const tags = tagsRaw
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean)
+          .slice(0, 10);
+
+        if (!name || !short || !description || !category || !Number.isFinite(price) || price < 0) {
+          addProductStatus.textContent = "Please fill required fields.";
+          return;
+        }
+
+        const imageU = addProductImageDataUrl || document.getElementById("aImage").value.trim();
+        const body = {
+          name,
+          short,
+          description,
+          category,
+          subcategory,
+          price,
+          compareAt,
+          tags,
+        };
+        if (imageU) body.image = imageU;
+
+        addProductStatus.textContent = "Adding...";
+        try {
+          await apiPost("/api/products", body, pw);
+          addProductStatus.textContent = "Added";
+          addProductAdminForm.reset();
+          addProductImageDataUrl = null;
+        } catch (err) {
+          addProductStatus.textContent = "Error";
+          alert(String(err.message || err));
+        }
+        await loadAdminData();
+      });
+
+      // Load on page open
+      document.addEventListener("DOMContentLoaded", () => {
+        loadAdminData().catch((e) => {
+          pricingStatus.textContent = "Backend not running";
+          console.error(e);
+        });
+      });
+    </script>
+  </body>
+</html>
+
