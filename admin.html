@@ -1,0 +1,650 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="Admin panel for pricing and products" />
+    <title>Madni Care Center • Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="icon.svg" />
+    <meta name="theme-color" content="#173b2d" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Madni Care" />
+  </head>
+  <body data-page="admin">
+    <header class="topbar">
+      <div class="container">
+        <nav class="nav" aria-label="Main navigation">
+          <a class="brand" href="index.html">
+            <span class="logo" aria-hidden="true"></span>
+            <span data-biz-name>Your Business Name</span>
+          </a>
+          <div class="spacer"></div>
+          <div class="nav-links">
+            <a data-nav data-nav="home" href="index.html">Home</a>
+            <a data-nav data-nav="products" href="products.html">Shop</a>
+            <a data-nav data-nav="about" href="about.html">About</a>
+            <a data-nav data-nav="contact" href="contact.html">Contact</a>
+            <a class="pill" href="cart.html" aria-label="Cart">
+              Cart <span class="badge" data-cart-count>0</span>
+            </a>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <div class="page-cover" aria-hidden="true"></div>
+
+    <main class="section admin-page-main">
+      <div class="container">
+        <div class="card pad">
+          <div class="row admin-page-head" style="margin-bottom: 0">
+            <h1 style="margin: 0; letter-spacing: -0.4px">Admin</h1>
+            <div class="spacer admin-page-head-spacer"></div>
+            <a class="btn small admin-back-shop" href="products.html">Back to shop</a>
+          </div>
+
+          <p class="subhead" style="margin:0 0 12px;">
+            Pricing, <strong>built-in catalog</strong> (code wali list), aur naye products <strong>localStorage</strong> par save
+            hotay hain.
+          </p>
+
+          <div class="divider"></div>
+
+          <section class="admin-bc-section" style="margin-bottom: 16px">
+            <h2 style="margin: 0 0 8px">Built-in catalog (app.js products)</h2>
+            <p class="subhead" style="margin: 0 0 10px">
+              Har product kholo, edit karo, phir <strong>Save catalog changes</strong>. Data key:
+              <code>pangy_base_catalog_edits_v1</code>. Pricing table neeche ab isi merged naam/category dikhayegi.
+            </p>
+            <p class="tiny muted" style="margin: 0 0 8px">
+              Reviews = JSON array, e.g. <code>[{"name":"Ali","stars":5,"text":"Nice"}]</code> —
+              photo ke liye <strong>Product photo</strong> se gallery/camera chunen (compress ho kar save), ya neeche URL likhen.
+            </p>
+            <div id="baseCatalogEditor" class="stack" style="gap: 8px"></div>
+            <div class="row admin-mobile-save-bar" style="margin-top: 12px; flex-wrap: wrap; gap: 4px">
+              <button class="btn primary" type="button" id="saveBaseCatalogBtn">Save catalog changes</button>
+              <button class="btn" type="button" id="clearBaseCatalogBtn">Clear catalog edits</button>
+            </div>
+            <p class="tiny muted" id="baseCatalogStatus" style="margin-top: 8px"></p>
+          </section>
+
+          <div class="divider"></div>
+
+          <div class="two-col admin-main-columns">
+            <section class="admin-pricing-section">
+              <h2 style="margin:0 0 10px;">Pricing control</h2>
+              <p class="subhead" style="margin:0 0 12px;">Update PKR prices and compare-at values for every product.</p>
+
+              <div class="admin-table-scroll">
+                <table class="table" id="pricingTable">
+                  <thead>
+                    <tr>
+                      <th>Product</th>
+                      <th>Category</th>
+                      <th>Subcategory</th>
+                      <th class="right">Price (PKR)</th>
+                      <th class="right">Compare at (PKR)</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+
+              <div class="row admin-save-row admin-mobile-save-bar" style="margin-top: 8px">
+                <button class="btn primary admin-save-btn" id="savePricingBtn" type="button">Save pricing</button>
+                <div class="spacer admin-save-spacer"></div>
+                <span class="tiny admin-save-status" id="pricingStatus"></span>
+              </div>
+            </section>
+
+            <aside class="stack admin-add-aside" style="gap: 4px">
+              <section class="card pad soft admin-add-card" style="box-shadow: none">
+                <h2 style="margin:0 0 10px;">Add product</h2>
+                <p class="subhead" style="margin:0 0 12px;">Naya item is device par localStorage mein jata hai.</p>
+
+                <form id="addProductAdminForm" class="stack" style="gap:4px;">
+                  <div class="field">
+                    <label for="aName">Product name *</label>
+                    <input class="input" id="aName" required placeholder="e.g., Herbal Tea Blend" />
+                  </div>
+                  <div class="field">
+                    <label for="aShort">Short description *</label>
+                    <input class="input" id="aShort" required placeholder="e.g., Calm evenings in every cup" />
+                  </div>
+                  <div class="field">
+                    <label for="aDesc">Full description *</label>
+                    <textarea class="input" id="aDesc" rows="4" required placeholder="Ingredients, usage, benefits..."></textarea>
+                  </div>
+
+                  <div class="field">
+                    <label for="aCategory">Category *</label>
+                    <input class="input" id="aCategory" required placeholder="e.g., Herbal Items" />
+                  </div>
+                  <div class="field">
+                    <label for="aSubcategory">Subcategory</label>
+                    <input class="input" id="aSubcategory" placeholder="e.g., Seeds" />
+                  </div>
+
+                  <div class="grid" style="gap:4px;">
+                    <div class="col-6 field">
+                      <label for="aPrice">Price (PKR) *</label>
+                      <input class="input" id="aPrice" type="number" min="0" step="1" required placeholder="e.g., 2500" />
+                    </div>
+                    <div class="col-6 field">
+                      <label for="aCompareAt">Compare at (PKR)</label>
+                      <input class="input" id="aCompareAt" type="number" min="0" step="1" placeholder="(optional)" />
+                    </div>
+                  </div>
+
+                  <div class="field">
+                    <label for="aTags">Tags (comma separated)</label>
+                    <input class="input" id="aTags" placeholder="e.g., Pansar store, Pure" />
+                  </div>
+
+                  <div class="field">
+                    <label for="aPhotoFile">Product photo (mobile camera / gallery)</label>
+                    <input type="file" id="aPhotoFile" accept="image/*" class="input" style="padding: 10px 8px" />
+                    <p class="help">Photo compress ho kar is browser mein save hoti hai. Optional: neeche URL.</p>
+                  </div>
+                  <div class="field">
+                    <label for="aImage">Ya image URL (optional)</label>
+                    <input class="input" id="aImage" placeholder="https://… or /assets/file.jpg" />
+                  </div>
+
+                  <button class="btn primary" type="submit">Add product</button>
+                  <div class="tiny muted" id="addProductStatus"></div>
+                </form>
+              </section>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="row">
+          <div class="stack" style="gap:4px;">
+            <strong data-biz-name>Your Business Name</strong>
+            <div class="tiny" data-biz-tagline>Modern wellness products crafted with care.</div>
+          </div>
+          <div class="spacer"></div>
+          <div class="row">
+            <a href="products.html">Shop</a>
+            <a href="about.html">About</a>
+            <a href="contact.html">Contact</a>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="tiny">© <span id="year"></span> <span data-biz-name>Your Business Name</span>.</div>
+      </div>
+    </footer>
+
+    <div class="toast" id="toast" role="status" aria-live="polite">
+      <span class="dot" aria-hidden="true"></span>
+      <span data-toast-text>Updated</span>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="app.js"></script>
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+
+    <script>
+      if (!window.PANGY || !window.PANGY.requireOwner || !window.PANGY.requireOwner()) {
+        // owner login is rendered by app.js
+        // stop this admin script
+      } else {
+      const PRICE_KEY_LS = "pangy_price_overrides_v1";
+      const USER_PRODUCTS_KEY_LS = "pangy_user_products_v1";
+
+      function loadPricingOverridesLS() {
+        try {
+          const raw = localStorage.getItem(PRICE_KEY_LS);
+          const p = raw ? JSON.parse(raw) : {};
+          return p && typeof p === "object" ? p : {};
+        } catch {
+          return {};
+        }
+      }
+      function savePricingOverridesLS(obj) {
+        localStorage.setItem(PRICE_KEY_LS, JSON.stringify(obj && typeof obj === "object" ? obj : {}));
+      }
+      function loadUserProductsLS() {
+        try {
+          const raw = localStorage.getItem(USER_PRODUCTS_KEY_LS);
+          const p = raw ? JSON.parse(raw) : [];
+          return Array.isArray(p) ? p : [];
+        } catch {
+          return [];
+        }
+      }
+      function saveUserProductsLS(list) {
+        localStorage.setItem(USER_PRODUCTS_KEY_LS, JSON.stringify(Array.isArray(list) ? list : []));
+      }
+      function makeProductId(name) {
+        const slug = String(name || "")
+          .trim()
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)/g, "");
+        return "u-" + (slug || "product") + "-" + Date.now();
+      }
+
+      function money(n) {
+        return Number(n).toLocaleString("en-PK", {
+          style: "currency",
+          currency: "PKR",
+          maximumFractionDigits: 0,
+        });
+      }
+
+      let addProductImageDataUrl = null;
+
+      function compressImageToDataUrl(file) {
+        return new Promise((resolve, reject) => {
+          const maxBytes = 14 * 1024 * 1024;
+          const maxEdge = 1400;
+          if (!file || !file.type || file.type.indexOf("image/") !== 0) {
+            reject(new Error("Sirf image file chuniye."));
+            return;
+          }
+          if (file.size > maxBytes) {
+            reject(new Error("Photo bahut bari hai."));
+            return;
+          }
+          const img = new Image();
+          const u = URL.createObjectURL(file);
+          img.onload = function () {
+            URL.revokeObjectURL(u);
+            let w = img.naturalWidth || img.width;
+            let h = img.naturalHeight || img.height;
+            if (w > maxEdge || h > maxEdge) {
+              if (w >= h) {
+                h = Math.round((h * maxEdge) / w);
+                w = maxEdge;
+              } else {
+                w = Math.round((w * maxEdge) / h);
+                h = maxEdge;
+              }
+            }
+            const canvas = document.createElement("canvas");
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, w, h);
+            try {
+              resolve(canvas.toDataURL("image/jpeg", 0.82));
+            } catch (e) {
+              reject(new Error("Image save error"));
+            }
+          };
+          img.onerror = function () {
+            URL.revokeObjectURL(u);
+            reject(new Error("Image load nahi hui"));
+          };
+          img.src = u;
+        });
+      }
+
+      const pricingTableBody = document.querySelector("#pricingTable tbody");
+      const pricingStatus = document.getElementById("pricingStatus");
+      const savePricingBtn = document.getElementById("savePricingBtn");
+      const addProductAdminForm = document.getElementById("addProductAdminForm");
+      const addProductStatus = document.getElementById("addProductStatus");
+      const aPhotoFileEl = document.getElementById("aPhotoFile");
+      aPhotoFileEl?.addEventListener("change", async function (e) {
+        const f = e.target.files && e.target.files[0];
+        e.target.value = "";
+        if (!f) return;
+        try {
+          addProductImageDataUrl = await compressImageToDataUrl(f);
+          addProductStatus.textContent = "Photo tayar — Add product dabayein.";
+        } catch (err) {
+          addProductImageDataUrl = null;
+          alert(String(err.message || err));
+          addProductStatus.textContent = "";
+        }
+      });
+
+      let overrides = {};
+      let userProducts = [];
+      let baseProducts = [];
+
+      function renderBaseCatalogEditor() {
+        const box = document.getElementById("baseCatalogEditor");
+        if (!box || !window.PANGY || !window.PANGY.getBaseCatalogMergedList) return;
+        box.innerHTML = "";
+        const list = window.PANGY.getBaseCatalogMergedList();
+        for (const cur of list) {
+          const det = document.createElement("details");
+          det.style.cssText =
+            "border:1px solid var(--border);border-radius:12px;padding:8px 12px;background:rgba(255,255,255,.55);";
+          const sum = document.createElement("summary");
+          sum.style.cssText = "cursor:pointer;font-weight:850;letter-spacing:-0.2px;";
+          sum.textContent = cur.name + " • " + cur.id;
+          det.appendChild(sum);
+
+          const grid = document.createElement("div");
+          grid.className = "grid";
+          grid.style.cssText = "gap:8px;margin-top:10px;";
+
+          function addField(colClass, label, el) {
+            const w = document.createElement("div");
+            w.className = "field " + colClass;
+            const lab = document.createElement("label");
+            lab.textContent = label;
+            w.appendChild(lab);
+            w.appendChild(el);
+            grid.appendChild(w);
+          }
+
+          function mkInput(field, type, val) {
+            const el = document.createElement("input");
+            el.type = type;
+            el.className = "input";
+            el.setAttribute("data-bc-id", cur.id);
+            el.setAttribute("data-bc-field", field);
+            el.value = val != null ? String(val) : "";
+            return el;
+          }
+
+          function mkTextarea(field, rows, val) {
+            const el = document.createElement("textarea");
+            el.className = "input";
+            el.rows = rows;
+            el.setAttribute("data-bc-id", cur.id);
+            el.setAttribute("data-bc-field", field);
+            el.value = val != null ? String(val) : "";
+            return el;
+          }
+
+          addField("col-12", "Name *", mkInput("name", "text", cur.name));
+          addField("col-12", "Short *", mkInput("short", "text", cur.short));
+          addField("col-12", "Description *", mkTextarea("description", 4, cur.description));
+          addField("col-6", "Category *", mkInput("category", "text", cur.category));
+          addField("col-6", "Subcategory", mkInput("subcategory", "text", cur.subcategory || ""));
+          addField("col-6", "Strength", mkInput("strength", "text", cur.strength || ""));
+
+          const imageInp = mkInput("image", "text", cur.image || "");
+          const photoBlock = document.createElement("div");
+          photoBlock.className = "field col-12";
+          const photoLab = document.createElement("label");
+          photoLab.textContent = "Product photo (camera / gallery)";
+          const fileInp = document.createElement("input");
+          fileInp.type = "file";
+          fileInp.accept = "image/*";
+          fileInp.className = "input";
+          fileInp.style.padding = "10px 8px";
+          const prevImg = document.createElement("img");
+          prevImg.alt = "";
+          prevImg.style.cssText =
+            "max-height:140px;max-width:220px;border-radius:10px;margin-top:8px;border:1px solid var(--border);object-fit:cover;";
+          const imgStr = cur.image && String(cur.image).trim();
+          if (imgStr) {
+            prevImg.src = imgStr;
+            prevImg.style.display = "block";
+          } else {
+            prevImg.style.display = "none";
+          }
+          const photoStatus = document.createElement("p");
+          photoStatus.className = "help";
+          photoStatus.style.marginTop = "6px";
+          photoStatus.textContent = "";
+          fileInp.addEventListener("change", async function (ev) {
+            const f = ev.target.files && ev.target.files[0];
+            ev.target.value = "";
+            if (!f) return;
+            photoStatus.textContent = "Compress ho rahi hai…";
+            try {
+              const dataUrl = await compressImageToDataUrl(f);
+              imageInp.value = dataUrl;
+              prevImg.src = dataUrl;
+              prevImg.style.display = "block";
+              photoStatus.textContent = "Photo set — ab Save catalog dabayein.";
+            } catch (err) {
+              photoStatus.textContent = "";
+              alert(String(err.message || err));
+            }
+          });
+          photoBlock.appendChild(photoLab);
+          photoBlock.appendChild(fileInp);
+          photoBlock.appendChild(prevImg);
+          photoBlock.appendChild(photoStatus);
+          grid.appendChild(photoBlock);
+
+          addField(
+            "col-12",
+            "Image URL (optional — /assets/... ya upar se photo)",
+            imageInp,
+          );
+          addField("col-6", "Price (PKR) *", mkInput("price", "number", cur.price));
+          addField("col-6", "Compare at (PKR)", mkInput("compareAt", "number", cur.compareAt));
+          addField("col-6", "Rating", mkInput("rating", "number", cur.rating));
+          addField("col-6", "Review count", mkInput("reviewCount", "number", cur.reviewCount));
+          addField("col-12", "Tags (comma)", mkInput("tags", "text", (cur.tags || []).join(", ")));
+          addField(
+            "col-12",
+            "Reviews (JSON)",
+            mkTextarea("reviews", 5, JSON.stringify(cur.reviews || [], null, 2)),
+          );
+
+          det.appendChild(grid);
+          box.appendChild(det);
+        }
+      }
+
+      function collectBaseCatalogFromForm() {
+        const root = document.getElementById("baseCatalogEditor");
+        if (!root || !window.PANGY) return null;
+        const next = {};
+        const ids = window.PANGY.BASE_PRODUCTS.map((p) => p.id);
+        for (const id of ids) {
+          const Q = (f) => root.querySelector(`[data-bc-id="${id}"][data-bc-field="${f}"]`);
+          const nameEl = Q("name");
+          if (!nameEl) continue;
+          let reviews;
+          try {
+            reviews = JSON.parse((Q("reviews").value || "").trim() || "[]");
+            if (!Array.isArray(reviews)) throw new Error("not array");
+          } catch (e) {
+            throw new Error("Reviews JSON galat hai: " + id);
+          }
+          const price = Number(Q("price").value);
+          const compareAt = Number(Q("compareAt").value);
+          const rating = Number(Q("rating").value);
+          const reviewCount = Number(Q("reviewCount").value);
+          if (!nameEl.value.trim()) throw new Error("Name khali: " + id);
+          if (!Number.isFinite(price) || price < 0) throw new Error("Price theek karo: " + id);
+          const reviewsClean = reviews.map((r) => ({
+            name: String((r && r.name) || ""),
+            stars: Math.min(5, Math.max(0, Math.round(Number(r && r.stars) || 0))),
+            text: String((r && r.text) || ""),
+          }));
+          next[id] = {
+            name: nameEl.value.trim(),
+            short: Q("short").value,
+            description: Q("description").value,
+            category: Q("category").value.trim(),
+            subcategory: Q("subcategory").value,
+            strength: Q("strength").value,
+            image: Q("image").value.trim(),
+            price,
+            compareAt: Number.isFinite(compareAt) && compareAt >= 0 ? compareAt : price,
+            rating: Number.isFinite(rating) ? rating : 0,
+            reviewCount: Number.isFinite(reviewCount) && reviewCount >= 0 ? reviewCount : 0,
+            tags: Q("tags")
+              .value.split(",")
+              .map((t) => t.trim())
+              .filter(Boolean)
+              .slice(0, 12),
+            reviews: reviewsClean,
+          };
+        }
+        return next;
+      }
+
+      function effectivePrice(product) {
+        const o = overrides && overrides[product.id] ? overrides[product.id] : null;
+        return Number(o && o.price !== undefined ? o.price : product.price);
+      }
+
+      function effectiveCompare(product) {
+        const o = overrides && overrides[product.id] ? overrides[product.id] : null;
+        const fallback = (typeof product.compareAt === "number" ? product.compareAt : product.price);
+        return Number(o && o.compareAt !== undefined ? o.compareAt : fallback);
+      }
+
+      function renderPricingTable() {
+        const all = baseProducts.concat(userProducts);
+        pricingTableBody.innerHTML = all
+          .map((p) => {
+            const curPrice = effectivePrice(p);
+            const curCompare = effectiveCompare(p);
+            return `
+              <tr>
+                <td>
+                  <div style="font-weight:850; letter-spacing:-0.2px;">${p.name}</div>
+                  <div class="muted" style="font-size:12px;">${p.short || ""}</div>
+                </td>
+                <td>${p.category || ""}</td>
+                <td>${p.subcategory || "-"}</td>
+                <td class="right">
+                  <input class="input" style="max-width:120px; text-align:right;" type="number" step="1" min="0"
+                    value="${curPrice}" data-price="${p.id}" />
+                </td>
+                <td class="right">
+                  <input class="input" style="max-width:120px; text-align:right;" type="number" step="1" min="0"
+                    value="${curCompare}" data-compare="${p.id}" />
+                </td>
+              </tr>
+            `;
+          })
+          .join("");
+      }
+
+      function loadAdminData() {
+        pricingStatus.textContent = "Loading...";
+        baseProducts =
+          window.PANGY && window.PANGY.getBaseCatalogMergedList ? window.PANGY.getBaseCatalogMergedList() : [];
+        overrides = loadPricingOverridesLS();
+        userProducts = loadUserProductsLS();
+        renderBaseCatalogEditor();
+        renderPricingTable();
+        pricingStatus.textContent = "Ready";
+      }
+
+      savePricingBtn.addEventListener("click", () => {
+        const rows = pricingTableBody.querySelectorAll("tr");
+        const tableOverrides = {};
+
+        for (const tr of rows) {
+          const priceInput = tr.querySelector("[data-price]");
+          const compareInput = tr.querySelector("[data-compare]");
+          if (!priceInput) continue;
+          const productId = priceInput.getAttribute("data-price");
+          const price = Number(priceInput.value);
+          const compareAt = Number(compareInput ? compareInput.value : price);
+          if (!Number.isFinite(price) || price < 0) continue;
+
+          tableOverrides[productId] = {
+            price,
+            compareAt: Number.isFinite(compareAt) ? compareAt : price,
+          };
+        }
+
+        pricingStatus.textContent = "Saving...";
+        const merged = { ...loadPricingOverridesLS(), ...tableOverrides };
+        savePricingOverridesLS(merged);
+        pricingStatus.textContent = "Saved";
+        location.reload();
+      });
+
+      addProductAdminForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const name = document.getElementById("aName").value.trim();
+        const short = document.getElementById("aShort").value.trim();
+        const description = document.getElementById("aDesc").value.trim();
+        const category = document.getElementById("aCategory").value.trim();
+        const subcategory = document.getElementById("aSubcategory").value.trim();
+        const price = Number(document.getElementById("aPrice").value);
+        const compareAtRaw = document.getElementById("aCompareAt").value;
+        const compareAt = compareAtRaw === "" ? null : Number(compareAtRaw);
+        const tagsRaw = document.getElementById("aTags").value || "";
+        const tags = tagsRaw
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean)
+          .slice(0, 10);
+
+        if (!name || !short || !description || !category || !Number.isFinite(price) || price < 0) {
+          addProductStatus.textContent = "Please fill required fields.";
+          return;
+        }
+
+        const imageU = addProductImageDataUrl || document.getElementById("aImage").value.trim();
+
+        addProductStatus.textContent = "Adding...";
+        const list = loadUserProductsLS();
+        const id = makeProductId(name);
+        const product = {
+          id,
+          name,
+          short,
+          description,
+          category,
+          subcategory,
+          strength: "",
+          price,
+          compareAt: compareAt != null && Number.isFinite(compareAt) ? compareAt : price,
+          rating: 0,
+          reviewCount: 0,
+          tags,
+          reviews: [],
+        };
+        if (imageU) product.image = imageU;
+        list.push(product);
+        saveUserProductsLS(list);
+        addProductStatus.textContent = "Added";
+        addProductAdminForm.reset();
+        addProductImageDataUrl = null;
+        location.reload();
+      });
+
+      document.getElementById("saveBaseCatalogBtn")?.addEventListener("click", () => {
+        const st = document.getElementById("baseCatalogStatus");
+        if (st) st.textContent = "";
+        try {
+          const next = collectBaseCatalogFromForm();
+          if (!next || !window.PANGY) return;
+          window.PANGY.saveBaseCatalogEdits(next);
+          if (st) st.textContent = "Saved — reloading…";
+          location.reload();
+        } catch (err) {
+          if (st) st.textContent = String(err.message || err);
+          else alert(String(err.message || err));
+        }
+      });
+
+      document.getElementById("clearBaseCatalogBtn")?.addEventListener("click", () => {
+        if (!confirm("Saari built-in catalog edits hata dein? (app.js defaults wapas)")) return;
+        try {
+          localStorage.removeItem(window.PANGY && window.PANGY.BASE_CATALOG_EDITS_KEY);
+        } catch (_) {}
+        location.reload();
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        loadAdminData();
+      });
+      }
+    </script>
+  </body>
+</html>
+

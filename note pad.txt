@@ -1,0 +1,3 @@
+Local preview: dev.bat → http://localhost:8080
+Ya: npx serve . -l 8080
+Ya: python -m http.server 8080

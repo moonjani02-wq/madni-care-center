@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Madni Care">
+  <rect width="512" height="512" rx="96" fill="#173b2d"/>
+  <path fill="#2f9e5b" d="M256 96c-48 120-144 176-144 272 0 44 36 80 80 80h128c44 0 80-36 80-80 0-96-96-152-144-272z"/>
+  <circle cx="256" cy="312" r="28" fill="#fbf6ea"/>
+</svg>
